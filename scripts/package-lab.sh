@@ -20,7 +20,7 @@ PHONON_ENGINE_DIR="$engine_dir" PHONON_REQUIRE_ENGINE=1 PHONON_CODESIGN_IDENTITY
     bash "$script_dir/package-bar.sh"
 
 app="$project_dir/bar/dist/Phonon.app"
-lab="$project_dir/bar/dist/Murmur Lab.app"
+lab=${PHONON_LAB_OUTPUT:-$project_dir/bar/dist/Murmur Lab.app}
 mkdir -p "$app/Contents/Resources/docs"
 cp "$project_dir/docs/subvocal-research.md" "$app/Contents/Resources/docs/"
 PHONON_ICON_RENDERER="$script_dir/make-murmur-icon.swift" \

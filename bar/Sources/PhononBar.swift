@@ -1191,6 +1191,7 @@ final class MicRecorder {
     /// This dictation's loudest buffer and how many frames it has captured.
     private var peakRms = 0.0
     private var capturedFrames = 0
+    private var latestRms = 0.0
     private var streamSamples: [Float] = []
     private var captureEnabled = false
     private var configuredDeviceID: AudioDeviceID?
@@ -1322,9 +1323,22 @@ final class MicRecorder {
         meterFrame = 0
         peakRms = 0
         capturedFrames = 0
+        latestRms = 0
         streamSamples.removeAll(keepingCapacity: true)
         captureEnabled = true
         lock.unlock()
+    }
+
+    var speechLabFormat: SpeechLabCaptureFormat {
+        SpeechLabCaptureFormat(microphone: selectedDeviceName, sampleRate: hwSampleRate)
+    }
+
+    var speechLabMeter: SpeechLabCaptureMeter {
+        lock.lock()
+        defer { lock.unlock() }
+        return SpeechLabCaptureMeter(
+            seconds: Double(capturedFrames) / max(1, hwSampleRate),
+            rmsDBFS: 20 * log10(max(latestRms, 1e-9)), sampleRate: hwSampleRate)
     }
 
     /// Below this RMS (-90 dBFS) the input is digital silence: a muted, disconnected or
@@ -1479,6 +1493,7 @@ final class MicRecorder {
         meterFrame += 1
         peakRms = max(peakRms, rms)
         capturedFrames += frames
+        latestRms = rms
         let amp = meter
         let shouldPublishAmplitude = meterFrame.isMultiple(of: 2)
         streamSamples.append(contentsOf: chunk)
@@ -2048,6 +2063,22 @@ final class AppController: NSObject, NSApplicationDelegate {
             return self.enginesReady && !self.isRecording && !self.processing
                 && !self.meetings.isRecording
         }
+        appStore.speechLab.onStartCapture = { [weak self] in
+            guard let self else { throw CocoaError(.userCancelled) }
+            try self.recorder.start()
+            self.updateMicrophoneStatus()
+            return self.recorder.speechLabFormat
+        }
+        appStore.speechLab.onCaptureMeter = { [weak self] in
+            self?.recorder.speechLabMeter
+                ?? SpeechLabCaptureMeter(seconds: 0, rmsDBFS: -180, sampleRate: 0)
+        }
+        appStore.speechLab.onStopCapture = { [weak self] in
+            guard let self else { return SpeechLabCapture(samples: [], sampleRate: 0) }
+            self.recorder.endCapture(keepHardwareWarm: self.appStore.settings.instantMic)
+            let capture = self.recorder.takeSamples()
+            return SpeechLabCapture(samples: capture.samples, sampleRate: capture.sampleRate)
+        }
         appStore.onDictionaryChanged = { [weak self] in
             self?.engine.send(["cmd": "reload_dictionary"])
         }
@@ -2367,10 +2398,10 @@ final class AppController: NSObject, NSApplicationDelegate {
         state.streamingPreviewEnabled = appStore.settings.streaming
         state.showWhenIdle = appStore.settings.showIdleCapsule
         streamingMenuItem?.state = state.streamingPreviewEnabled ? .on : .off
-        if appStore.settings.instantMic {
+        if appStore.settings.instantMic && !appStore.speechLab.isRecording {
             recorder.refreshPreferredDevice()
             updateMicrophoneStatus()
-        } else if !isRecording {
+        } else if !isRecording && !appStore.speechLab.isRecording {
             recorder.releaseHardware()
         }
         applyDockVisibility()

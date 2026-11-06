@@ -252,25 +252,48 @@ struct NotesView: View {
         _selectedID = State(initialValue: selectedID)
     }
 
+    private var selectedVoice: VoiceNote? {
+        guard let selectedID else { return store.voiceNotes.first }
+        return store.voiceNotes.first { $0.id == selectedID }
+    }
+
     private var selected: MeetingNote? {
-        store.meetings.first { $0.id == selectedID } ?? store.meetings.first
+        if let selectedID { return store.meetings.first { $0.id == selectedID } }
+        return store.voiceNotes.isEmpty ? store.meetings.first : nil
     }
 
     var body: some View {
         HStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 2) {
+                LazyVStack(alignment: .leading, spacing: 2) {
                     Text("Notes")
                         .font(.system(size: 22, weight: .semibold))
                         .tracking(-0.44)
                         .padding(.horizontal, 10)
                         .padding(.bottom, 12)
+                    ForEach(store.voiceNotes) { note in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(note.title).font(.system(size: 13.5, weight: .medium)).lineLimit(2)
+                            Text("\(note.source) · \(FeedTime.label(note.date))")
+                                .font(.caption).foregroundStyle(EmberTheme.mute)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(10)
+                        .background(selectedVoice?.id == note.id ? EmberTheme.selected : .clear,
+                                    in: RoundedRectangle(cornerRadius: 8))
+                        .contentShape(Rectangle())
+                        .onTapGesture { selectedID = note.id }
+                    }
+                    if !store.meetings.isEmpty {
+                        Text("Meetings").font(.caption.weight(.semibold))
+                            .foregroundStyle(EmberTheme.mute).padding(.top, 12)
+                    }
                     ForEach(store.meetings) { note in
                         NoteListRow(note: note, selected: note.id == selected?.id)
                             .onTapGesture { withAnimation(Motion.quick) { selectedID = note.id } }
                     }
-                    if store.meetings.isEmpty {
-                        Text("No meetings yet.")
+                    if store.meetings.isEmpty && store.voiceNotes.isEmpty {
+                        Text("Speech Lab recordings, saved dictations and meetings appear here.")
                             .foregroundStyle(EmberTheme.mute)
                             .padding(.horizontal, 10)
                             .help(
@@ -287,7 +310,12 @@ struct NotesView: View {
             }
 
             Group {
-                if let note = selected {
+                if let note = selectedVoice {
+                    VoiceNoteDetail(note: note) {
+                        store.trashVoiceNote(note)
+                        selectedID = nil
+                    }.id(note.id)
+                } else if let note = selected {
                     NoteDetail(note: note).id(note.id)
                 } else {
                     Color.clear
@@ -295,7 +323,7 @@ struct NotesView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
-        .onAppear { store.loadMeetings() }
+        .onAppear { store.refreshNotes() }
     }
 }
 

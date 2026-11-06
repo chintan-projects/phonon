@@ -137,20 +137,38 @@ weights or device integration are included.
 The native sidebar has a **Speech Lab** page. It uses the existing local engine
 and makes the following actions explicit:
 
-1. Choose a reference, a normal/whisper condition and 0, +12 or +24 dB digital gain.
+1. Choose a microphone, an optional reference, a normal/whisper condition and
+   0, +12 or +24 dB digital gain. The condition is a label, not an ASR model switch.
 2. Click **Record**, speak, then **Stop & test**. Capture stops at 30 seconds.
    Alternatively import a short audio file or run the bundled startup sample.
 3. Inspect **Parakeet heard** and **LFM3 wrote** independently.
 4. Compare raw word error rate, rewritten word difference rate, input level,
    clipped-sample count, ASR/refiner time and complete batch processing time.
-5. Compare recent trials or export a JSON report. Audio is excluded from export.
+5. Play the original recording and ASR input separately. Compare recent trials
+   or export a JSON report. Audio is excluded from that report.
+6. New recordings and transcripts appear in **Notes**, unless **Save recordings
+   and transcripts in Notes** is turned off. Existing saved dictations also
+   appear there. Notes provides playback, file reveal and Move to Trash.
 
 The lab uses a batch preview command rather than the normal insertion path.
 It does not paste text, expand macros, read the screen or register recordings in
-the regular corpus. Capture/preprocessed WAVs are temporary and removed after
-success, failure or normal app shutdown. A crash can leave temporary files until
-the OS clears its temporary directory. Text results stay in memory unless
-explicitly exported. No new cloud API is introduced.
+the regular dictation corpus. With saving on, original audio, the exact 16 kHz
+ASR WAV, and metadata live under
+`~/Library/Application Support/Phonon/SpeechLabNotes/<utterance-id>/`. Audio is
+saved before recognition, so a model failure does not discard the recording;
+the raw transcript and rewrite are added as they arrive. These Notes are kept
+until deleted. With saving off, latest audio is retained in memory for playback
+and temporary files are removed after testing or normal shutdown. A crash can
+leave temporary files until the OS clears them. The bundled **Test sample**
+does not create a Note. No new cloud API is introduced.
+
+Capture uses the same CoreAudio recorder and microphone selection as regular
+dictation, retaining native-rate float audio. Apple's band-limited
+`AVAudioConverter` prepares the 16 kHz PCM16 model input; raw playback is not
+restricted to that recognition bandwidth. See
+[Apple's sample-rate conversion note](https://developer.apple.com/documentation/technotes/tn3136-avaudioconverter-performing-sample-rate-conversions).
+This corrects the experiment's capture consistency and conversion path; it is
+not evidence that the unchanged acoustic model recognizes all real whispers.
 
 Fixed gain scales speech and noise together. It may help or hurt a particular
 clip; the measurements make clipping visible. It is not a whisper-trained ASR

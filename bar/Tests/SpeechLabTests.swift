@@ -1,4 +1,5 @@
 import Foundation
+import AVFoundation
 import XCTest
 
 @testable import PhononBar
@@ -106,5 +107,78 @@ final class SpeechLabTests: XCTestCase {
         XCTAssertFalse(lab.isBusy)
         XCTAssertFalse(FileManager.default.fileExists(atPath: path))
         XCTAssertTrue(lab.trials.isEmpty)
+    }
+
+    func testHighQualityConversionRejectsAliasingAndPreservesSpeechBandAndDuration() throws {
+        let rate = 48_000.0
+        for frequency in [1_000.0, 12_000.0] {
+            let samples = (0..<48_000).map { Float(0.4 * sin(2 * .pi * frequency * Double($0) / rate)) }
+            let source = directory.appendingPathComponent("native.caf")
+            let destination = directory.appendingPathComponent("converted.wav")
+            try SpeechLabAudio.writeNative(samples, sampleRate: rate, to: source)
+            let signal = try SpeechLabAudio.prepare(source: source, destination: destination, gainDB: 0)
+            XCTAssertEqual(signal.sourceSampleRate, 48_000)
+            XCTAssertEqual(signal.seconds, 1, accuracy: 1.0 / 16_000)
+            let file = try AVAudioFile(forReading: destination)
+            let buffer = try XCTUnwrap(AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: AVAudioFrameCount(file.length)))
+            try file.read(into: buffer)
+            let values = Array(UnsafeBufferPointer(start: buffer.floatChannelData![0], count: Int(buffer.frameLength)))
+            let middle = values.dropFirst(500).dropLast(500)
+            let rms = sqrt(middle.reduce(0.0) { $0 + Double($1 * $1) } / Double(middle.count))
+            if frequency == 1_000 { XCTAssertEqual(rms, 0.4 / sqrt(2), accuracy: 0.005) }
+            else { XCTAssertLessThan(rms, 0.002, "12 kHz must not alias to a false 4 kHz tone") }
+        }
+    }
+
+    func testSavedNotesSurviveReloadAndUpdateWithoutDuplicatingAudio() throws {
+        let support = directory.appendingPathComponent("support")
+        let store = NativeAppStore(supportDirectory: support)
+        let lab = store.speechLab
+        lab.canBegin = { true }
+        lab.saveToNotes = true
+        lab.condition = "Whisper"
+        lab.gainDB = 12
+        var requests: [[String: Any]] = []
+        lab.onCommand = { requests.append($0) }
+        lab.testAudio(try audio())
+        XCTAssertEqual(store.speechLabNotes.count, 1, "audio is saved before recognition completes")
+        let id = try XCTUnwrap(requests.first?["id"] as? String)
+        lab.handle(["type": "result", "kind": "asr", "id": id, "text": "heard words", "seconds": 0.1])
+        lab.handle(["type": "result", "kind": "polish", "id": id, "text": "Heard words.", "latency_ms": 10.0])
+        let reloaded = NativeAppStore(supportDirectory: support)
+        XCTAssertEqual(reloaded.speechLabNotes.count, 1)
+        XCTAssertEqual(reloaded.voiceNotes.first?.raw, "heard words")
+        XCTAssertEqual(reloaded.voiceNotes.first?.wrote, "Heard words.")
+        let note = try XCTUnwrap(reloaded.voiceNotes.first)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: note.audioURL.path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: try XCTUnwrap(note.asrURL).path))
+        XCTAssertEqual(reloaded.speechLab.condition, "Whisper")
+        XCTAssertEqual(reloaded.speechLab.gainDB, 12)
+        XCTAssertTrue(reloaded.speechLab.saveToNotes)
+        XCTAssertTrue(reloaded.history.isEmpty, "experiments stay separate from dictation metrics")
+        XCTAssertTrue(lab.hasOriginalAudio)
+        XCTAssertTrue(lab.hasASRAudio)
+    }
+
+    func testSavingOffLeavesNoNotesAndFailedRecognitionKeepsSavedAudio() throws {
+        let support = directory.appendingPathComponent("support")
+        let store = NativeAppStore(supportDirectory: support)
+        let lab = store.speechLab
+        lab.canBegin = { true }
+        var request: [String: Any] = [:]
+        lab.onCommand = { request = $0 }
+        lab.saveToNotes = false
+        lab.testAudio(try audio())
+        lab.engineUnavailable()
+        XCTAssertTrue(store.speechLabNotes.isEmpty)
+        lab.saveToNotes = true
+        lab.testAudio(try audio())
+        let id = try XCTUnwrap(request["id"] as? String)
+        lab.handle(["type": "error", "id": id, "msg": "decoder failed"])
+        XCTAssertEqual(store.speechLabNotes.count, 1)
+        XCTAssertEqual(store.speechLabNotes.first?.record.trial.failure, "decoder failed")
+        lab.clear()
+        XCTAssertFalse(lab.hasOriginalAudio)
+        XCTAssertEqual(store.speechLabNotes.count, 1, "Clear view is not Delete Notes")
     }
 }

@@ -231,7 +231,7 @@ struct PhononMainView: View {
         case .insights: InsightsView(store: store)
         case .dictionary: DictionaryView(store: store)
         case .macros: MacrosView(store: store)
-        case .speechLab: SpeechLabView(store: store, lab: store.speechLab)
+        case .speechLab: SpeechLabView(store: store, lab: store.speechLab, onSettingsChanged: onSettingsChanged)
         case .settings:
             SettingsView(
                 store: store, onSettingsChanged: onSettingsChanged,

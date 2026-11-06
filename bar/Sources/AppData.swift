@@ -531,6 +531,7 @@ final class NativeAppStore: ObservableObject {
     @Published private(set) var macros: [PhononMacro] = []
     /// Recorded meetings under Meetings/, newest first.
     @Published private(set) var meetings: [MeetingNote] = []
+    @Published private(set) var speechLabNotes: [SpeechLabSavedNote] = []
     @Published var engineReady = false
     let speechLab = SpeechLabController()
     @Published var engineMessage = "Loading local models"
@@ -573,6 +574,13 @@ final class NativeAppStore: ObservableObject {
         self.supportDirectory = support
         self.mirrorDirectory = Self.mirrorDirectory(
             explicit: mirrorDirectory, injectedSupport: supportDirectory, fileManager: fileManager)
+        speechLab.configurePreferences(at: support.appendingPathComponent("speech-lab-settings.json"))
+        speechLab.onSaveNote = { [weak self] trial, original, asr, ext in
+            guard let self else { throw CocoaError(.fileWriteUnknown) }
+            try SpeechLabNoteFiles.save(trial: trial, original: original, asr: asr,
+                                        originalExtension: ext, root: self.speechLabNotesDirectory)
+            self.loadSpeechLabNotes()
+        }
         reloadAll()
         mirrorManifest = PhononDataMirror.capture(
             from: support, mirror: self.mirrorDirectory, fileManager: fileManager)
@@ -595,6 +603,7 @@ final class NativeAppStore: ObservableObject {
         loadHistory()
         loadMacros()
         loadMeetings()
+        loadSpeechLabNotes()
         refreshAvailableMicrophones()
     }
 
@@ -637,6 +646,31 @@ final class NativeAppStore: ObservableObject {
     }
 
     // MARK: Meetings
+
+    private var speechLabNotesDirectory: URL {
+        supportDirectory.appendingPathComponent("SpeechLabNotes", isDirectory: true)
+    }
+
+    var voiceNotes: [VoiceNote] {
+        (speechLabNotes.map(VoiceNote.lab) + history.filter {
+            fileManager.fileExists(atPath: $0.directoryURL.appendingPathComponent($0.metadata.audioFile).path)
+        }.map(VoiceNote.dictation)).sorted { $0.date > $1.date }
+    }
+
+    func loadSpeechLabNotes() { speechLabNotes = SpeechLabNoteFiles.load(from: speechLabNotesDirectory) }
+
+    func refreshNotes() { loadHistory(); loadMeetings(); loadSpeechLabNotes() }
+
+    func trashVoiceNote(_ note: VoiceNote) {
+        switch note {
+        case .dictation(let item): trashRecording(itemID: item.id)
+        case .lab(let item):
+            do {
+                _ = try fileManager.trashItem(at: item.directory, resultingItemURL: nil)
+                loadSpeechLabNotes()
+            } catch { lastError = "Could not move recording to Trash: \(error.localizedDescription)" }
+        }
+    }
 
     func loadMeetings() {
         meetings = MeetingNote.loadAll(

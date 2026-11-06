@@ -239,6 +239,29 @@ final class ScreenRenderTests: XCTestCase {
         try snapshot(view, size: CGSize(width: 784, height: 1180), name: "insights_full")
     }
 
+    func testSpeechLabSavedRecordingAndNotesRender() throws {
+        let store = store()
+        store.engineReady = true
+        let lab = store.speechLab
+        lab.canBegin = { true }
+        lab.condition = "Whisper"
+        lab.gainDB = 12
+        let clip = directory.appendingPathComponent("test.wav")
+        try SpeechLabAudio.wav([Int16](repeating: 1000, count: 16000)).write(to: clip)
+        var request: [String: Any] = [:]
+        lab.onCommand = { request = $0 }
+        lab.testAudio(clip)
+        let id = try XCTUnwrap(request["id"] as? String)
+        lab.handle(["type": "result", "kind": "asr", "id": id,
+                    "text": "please move the meeting to thursday and send me the updated agenda", "seconds": 0.02])
+        lab.handle(["type": "result", "kind": "polish", "id": id,
+                    "text": "Please move the meeting to Thursday and send me the updated agenda.", "latency_ms": 30.0])
+        _ = try snapshot(SpeechLabView(store: store, lab: lab), size: CGSize(width: 784, height: 900),
+                         name: "speech_lab_saved_recording")
+        _ = try snapshot(NotesView(store: store, selectedID: "lab:\(id)"),
+                         size: CGSize(width: 784, height: 680), name: "notes_speech_lab_recording")
+    }
+
     /// The app menu's Settings… item must land on Settings, not on whichever
     /// page the window showed last.
     func testPageRequestSwitchesTheOpenWindow() throws {

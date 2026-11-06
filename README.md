@@ -16,8 +16,17 @@ Our version is named **Murmur Lab**. The capability branch is
 and attribution retained. It adds **Speech Lab** to the sidebar for normal-versus-whispered
 microphone experiments. Press **Record**, read the reference, then **Stop & test**.
 The page compares Parakeet's raw transcript with LFM3's rewrite, measures word
-errors and batch latency, and offers fixed digital gain and JSON export. Audio
-is temporary; preview text is never automatically inserted into another app.
+errors and batch latency, and offers fixed digital gain and JSON export. New
+recordings and both transcripts are saved locally in **Notes** by default;
+turn off **Save recordings and transcripts in Notes** for a temporary test.
+Notes also lists existing saved dictations alongside meetings. Original audio
+and the exact ASR input have separate playback controls. Preview text is never
+automatically inserted into another app.
+
+Speech Lab shares normal dictation's selected microphone and captures at its
+native sample rate. A band-limited converter prepares the 16 kHz ASR input.
+The **Whisper** selector labels a trial; both conditions use the same Parakeet
+model. Digital gain changes the model input, and condition/gain settings persist.
 
 This is a microphone experiment. It cannot decode genuinely silent mouthing.
 The YC-backed Subvocal Company's RF glasses require different sensors and a
