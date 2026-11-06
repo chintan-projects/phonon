@@ -71,7 +71,9 @@ pinned release includes it.
   DFlash2 drafter extends.
 - DeepSeek-V4.1-Flash-1017,
   <https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017>, MIT: the
-  labeling model, run locally. DeepSeek's hosted API was not used.
+  labeling model, run locally for the 0.2.3 refiner rows. The 1.0 writing-mode
+  rows used DeepSeek's hosted API, as described above. This training-time API
+  use is separate from the app's local inference path.
 - ShareGPT_V3_unfiltered_cleaned_split, from
   <https://huggingface.co/datasets/anon8231489123/ShareGPT_Vicuna_unfiltered>
   (listed as Apache-2.0): input text for the drafter only, labeled with the
