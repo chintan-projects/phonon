@@ -1346,6 +1346,24 @@ pub fn run_engine_serve() -> Result<()> {
                             emit(&json!({"type":"error","id":id,"msg":format!("{e:#}")}));
                         }
                     }
+                    "lab_transcribe" => {
+                        // Explicit, batch-only preview. No corpus registration, speech gate,
+                        // screen context, microphone access or text insertion. The lab displays
+                        // the raw recognizer output, including its mistakes on quiet audio.
+                        let path = v.get("path").and_then(|x| x.as_str()).unwrap_or("");
+                        let id = v.get("id").and_then(|x| x.as_str());
+                        if !id.is_some_and(|id| id.starts_with("speech-lab-")) {
+                            emit(
+                                &json!({"type":"error","id":id,"msg":"lab request requires a speech-lab- id"}),
+                            );
+                        } else if !eng.asr_ready || !Path::new(path).is_file() {
+                            emit(
+                                &json!({"type":"error","id":id,"msg":"speech model not ready or audio file missing"}),
+                            );
+                        } else if let Err(error) = eng.asr.transcribe(Path::new(path), id) {
+                            emit(&json!({"type":"error","id":id,"msg":format!("{error:#}")}));
+                        }
+                    }
                     "stream_start" => {
                         let id = v.get("id").and_then(|x| x.as_str());
                         if let Err(e) = eng.stream_start(id, v.get("app")) {

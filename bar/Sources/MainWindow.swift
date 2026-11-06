@@ -70,6 +70,7 @@ enum NativeAppPage: String, CaseIterable, Identifiable {
     case insights = "Insights"
     case dictionary = "Dictionary"
     case macros = "Macros"
+    case speechLab = "Speech Lab"
     case settings = "Settings"
 
     var id: String { rawValue }
@@ -80,6 +81,7 @@ enum NativeAppPage: String, CaseIterable, Identifiable {
         case .insights: return "chart.bar"
         case .dictionary: return "book.closed"
         case .macros: return "bolt"
+        case .speechLab: return "waveform.path"
         case .settings: return "gearshape"
         }
     }
@@ -229,6 +231,7 @@ struct PhononMainView: View {
         case .insights: InsightsView(store: store)
         case .dictionary: DictionaryView(store: store)
         case .macros: MacrosView(store: store)
+        case .speechLab: SpeechLabView(store: store, lab: store.speechLab)
         case .settings:
             SettingsView(
                 store: store, onSettingsChanged: onSettingsChanged,

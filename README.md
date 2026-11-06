@@ -5,6 +5,27 @@ macOS is the shipped platform. Windows is in beta.
 
 [Website](https://phonon.sh) · [Releases](https://github.com/Infatoshi/phonon/releases)
 
+## Our local Speech Lab experiment
+
+This branch adds **Speech Lab** to the sidebar for normal-versus-whispered
+microphone experiments. Press **Record**, read the reference, then **Stop & test**.
+The page compares Parakeet's raw transcript with LFM3's rewrite, measures word
+errors and batch latency, and offers fixed digital gain and JSON export. Audio
+is temporary; preview text is never automatically inserted into another app.
+
+This is a microphone experiment. It cannot decode genuinely silent mouthing.
+The YC-backed Subvocal Company's RF glasses require different sensors and a
+trained sensor decoder. See [our research and experiment protocol](docs/subvocal-research.md)
+for evidence, open research, limitations, and the path to a future sensor input.
+
+Build the separate local app with `bash scripts/package-lab.sh`. It reuses the
+native Metal helpers from the verified release at `../verification/Phonon.app`
+(override `PHONON_LAB_ENGINE_APP` for a different path), builds the modified
+Swift/Rust source, and writes `bar/dist/PhononLab.app`. This local build is
+ad-hoc signed, has its own bundle identifier, and does not check for stock
+release updates. Quit the original Phonon before opening it. Microphone and
+other macOS permissions may need granting again for the new app identity.
+
 ## Install
 
 Apple silicon, macOS 14 or later.

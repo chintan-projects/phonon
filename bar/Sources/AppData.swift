@@ -532,6 +532,7 @@ final class NativeAppStore: ObservableObject {
     /// Recorded meetings under Meetings/, newest first.
     @Published private(set) var meetings: [MeetingNote] = []
     @Published var engineReady = false
+    let speechLab = SpeechLabController()
     @Published var engineMessage = "Loading local models"
     @Published var selectedMicrophone = "Resolving…"
     @Published var availableMicrophones: [String] = []

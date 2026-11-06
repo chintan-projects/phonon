@@ -2042,6 +2042,12 @@ final class AppController: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         applyDockVisibility()
         setupMainMenu()
+        appStore.speechLab.onCommand = { [weak self] command in self?.engine.send(command) }
+        appStore.speechLab.canBegin = { [weak self] in
+            guard let self else { return false }
+            return self.enginesReady && !self.isRecording && !self.processing
+                && !self.meetings.isRecording
+        }
         appStore.onDictionaryChanged = { [weak self] in
             self?.engine.send(["cmd": "reload_dictionary"])
         }
@@ -2422,6 +2428,7 @@ final class AppController: NSObject, NSApplicationDelegate {
 
     private func recoverFromEngineExit() {
         guard !terminating else { return }
+        appStore.speechLab.engineUnavailable()
         enginesReady = false
         appStore.engineReady = false
         appStore.engineMessage = "Engine restarting"
@@ -2447,6 +2454,14 @@ final class AppController: NSObject, NSApplicationDelegate {
     }
 
     private func handleEngine(_ ev: [String: Any]) {
+        // Lab results are preview-only: never enter dictation history or the paste path.
+        if SpeechLabController.owns(ev) {
+            appStore.speechLab.handle(ev)
+            return
+        }
+        if ev["type"] as? String == "error", ev["id"] == nil {
+            appStore.speechLab.engineUnavailable()
+        }
         let type = ev["type"] as? String ?? ""
         switch type {
         case "stream":
@@ -2826,6 +2841,7 @@ final class AppController: NSObject, NSApplicationDelegate {
         source: String = "direct", eventNs: UInt64 = DispatchTime.now().uptimeNanoseconds,
         callbackNs: UInt64 = DispatchTime.now().uptimeNanoseconds
     ) {
+        guard !appStore.speechLab.isBusy else { return }
         // If previous pass still polishing, abandon it for snappy re-trigger.
         if processing {
             if let pendingTranscribe {
@@ -3609,6 +3625,7 @@ final class AppController: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        appStore.speechLab.shutdown()
         terminating = true
         engineRestartWork?.cancel()
         screenContextTask?.cancel()
