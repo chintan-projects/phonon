@@ -7,5 +7,6 @@ trap 'rm -rf "$work_dir"' EXIT
 iconset="$work_dir/Phonon.iconset"
 mkdir -p "$iconset"
 
-swift "$(dirname "$0")/make-app-icon.swift" "$iconset"
+renderer=${PHONON_ICON_RENDERER:-$(dirname "$0")/make-app-icon.swift}
+swift "$renderer" "$iconset"
 iconutil -c icns "$iconset" -o "$output_path"
