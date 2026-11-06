@@ -159,9 +159,9 @@ struct ModelStartupView: View {
         VStack(alignment: .leading, spacing: 18) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(state.ready ? "Phonon is ready" : "Preparing Phonon")
+                    Text(state.ready ? "\(AppBrand.name) is ready" : "Preparing \(AppBrand.name)")
                         .font(.title2.weight(.semibold))
-                    Text("Phonon checks both models with a short test before you dictate.")
+                    Text("\(AppBrand.name) checks both models with a short test before you dictate.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -2238,7 +2238,7 @@ final class AppController: NSObject, NSApplicationDelegate {
             backing: .buffered,
             defer: false
         )
-        window.title = "Phonon model status"
+        window.title = "\(AppBrand.name) model status"
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
         window.isMovableByWindowBackground = true
@@ -2267,7 +2267,7 @@ final class AppController: NSObject, NSApplicationDelegate {
             backing: .buffered,
             defer: false
         )
-        window.title = "Phonon"
+        window.title = AppBrand.name
         // A programmatically created NSWindow releases itself when closed, which
         // ARC does not account for, so `mainWindow` would keep pointing at freed
         // memory and the next reopen would message it and crash.
@@ -2285,10 +2285,10 @@ final class AppController: NSObject, NSApplicationDelegate {
     private func setupStatusItem() {
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         item.button?.title = "ϕ"
-        item.button?.toolTip = "Phonon"
+        item.button?.toolTip = AppBrand.name
         let menu = NSMenu()
         menu.addItem(
-            NSMenuItem(title: "Open Phonon…", action: #selector(showMainWindow), keyEquivalent: ","))
+            NSMenuItem(title: "Open \(AppBrand.name)…", action: #selector(showMainWindow), keyEquivalent: ","))
         let updateItem = NSMenuItem(title: "", action: #selector(showUpdate), keyEquivalent: "")
         updateItem.isHidden = true
         menu.addItem(updateItem)
@@ -2327,7 +2327,7 @@ final class AppController: NSObject, NSApplicationDelegate {
         menu.addItem(meetingItem)
         meetingMenuItem = meetingItem
         menu.addItem(.separator())
-        menu.addItem(NSMenuItem(title: "Quit Phonon", action: #selector(quit), keyEquivalent: "q"))
+        menu.addItem(NSMenuItem(title: "Quit \(AppBrand.name)", action: #selector(quit), keyEquivalent: "q"))
         item.menu = menu
         statusItem = item
     }
@@ -3528,9 +3528,9 @@ final class AppController: NSObject, NSApplicationDelegate {
         let mainMenu = NSMenu()
 
         let appItem = NSMenuItem()
-        let appMenu = NSMenu(title: "Phonon")
+        let appMenu = NSMenu(title: AppBrand.name)
         appMenu.addItem(
-            withTitle: "About Phonon",
+            withTitle: "About \(AppBrand.name)",
             action: #selector(NSApplication.orderFrontStandardAboutPanel(_:)), keyEquivalent: "")
         let checkUpdates = NSMenuItem(
             title: "Check for Updates…", action: #selector(checkForUpdates), keyEquivalent: "")
@@ -3543,10 +3543,10 @@ final class AppController: NSObject, NSApplicationDelegate {
         appMenu.addItem(settings)
         appMenu.addItem(.separator())
         appMenu.addItem(
-            withTitle: "Hide Phonon", action: #selector(NSApplication.hide(_:)),
+            withTitle: "Hide \(AppBrand.name)", action: #selector(NSApplication.hide(_:)),
             keyEquivalent: "h")
         appMenu.addItem(.separator())
-        let quitItem = NSMenuItem(title: "Quit Phonon", action: #selector(quit), keyEquivalent: "q")
+        let quitItem = NSMenuItem(title: "Quit \(AppBrand.name)", action: #selector(quit), keyEquivalent: "q")
         quitItem.target = self
         appMenu.addItem(quitItem)
         appItem.submenu = appMenu

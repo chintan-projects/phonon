@@ -20,12 +20,14 @@ PHONON_ENGINE_DIR="$engine_dir" PHONON_REQUIRE_ENGINE=1 PHONON_CODESIGN_IDENTITY
     bash "$script_dir/package-bar.sh"
 
 app="$project_dir/bar/dist/Phonon.app"
-lab="$project_dir/bar/dist/PhononLab.app"
+lab="$project_dir/bar/dist/Murmur Lab.app"
 mkdir -p "$app/Contents/Resources/docs"
 cp "$project_dir/docs/subvocal-research.md" "$app/Contents/Resources/docs/"
 /usr/libexec/PlistBuddy -c 'Set :CFBundleIdentifier com.chintan.phononlab' "$app/Contents/Info.plist"
-/usr/libexec/PlistBuddy -c 'Set :CFBundleDisplayName Phonon Lab' "$app/Contents/Info.plist"
-/usr/libexec/PlistBuddy -c 'Set :CFBundleName Phonon Lab' "$app/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c 'Set :CFBundleDisplayName Murmur Lab' "$app/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c 'Set :CFBundleName Murmur Lab' "$app/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c 'Set :NSMicrophoneUsageDescription Murmur Lab records speech when you start dictation or a Speech Lab experiment.' "$app/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c 'Set :NSScreenCaptureUsageDescription Murmur Lab reads visible technical terms locally when screen context is enabled.' "$app/Contents/Info.plist"
 # A local build must not suggest replacing itself with an official stock release.
 /usr/libexec/PlistBuddy -c 'Set :CFBundleShortVersionString 1.0.0-lab' "$app/Contents/Info.plist"
 codesign --force --sign - --options runtime --timestamp=none \

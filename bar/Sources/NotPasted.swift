@@ -63,11 +63,11 @@ struct NotPastedView: View {
             )
         case .needsAccessibility:
             return (
-                "Phonon needs Accessibility to paste.",
-                "It's on your clipboard: press ⌘V, or turn Phonon on in Accessibility."
+                "\(AppBrand.name) needs Accessibility to paste.",
+                "It's on your clipboard: press ⌘V, or turn \(AppBrand.name) on in Accessibility."
             )
         case .notHeard(let mic):
-            return ("Phonon didn't hear anything.", "Listening on \(mic). Hold the key while you talk.")
+            return ("\(AppBrand.name) didn't hear anything.", "Listening on \(mic). Hold the key while you talk.")
         case .micSilent(let mic):
             return ("Your mic isn't sending any sound.", "\(mic) is silent. Check it isn't muted.")
         }

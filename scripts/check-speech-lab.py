@@ -20,7 +20,7 @@ from pathlib import Path
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--app", type=Path, default=Path(__file__).resolve().parents[1] / "bar/dist/PhononLab.app")
+    parser.add_argument("--app", type=Path, default=Path(__file__).resolve().parents[1] / "bar/dist/Murmur Lab.app")
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     app = args.app.resolve()

@@ -185,7 +185,7 @@ struct PhononMainView: View {
         .tint(EmberTheme.ember)
         .preferredColorScheme(.dark)
         .alert(
-            "Phonon",
+            AppBrand.name,
             isPresented: Binding(
                 get: { store.lastError != nil },
                 set: { if !$0 { store.lastError = nil } }
@@ -254,7 +254,7 @@ struct Sidebar: View {
                             center: .center, startRadius: 0, endRadius: 11)
                     )
                     .frame(width: 22, height: 22)
-                Text("Phonon").font(.system(size: 15, weight: .semibold)).tracking(-0.3)
+                Text(AppBrand.name).font(.system(size: 15, weight: .semibold)).tracking(-0.3)
             }
             .padding(.horizontal, 8)
             .padding(.top, 6)
@@ -757,7 +757,7 @@ struct DictionaryView: View {
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
                     .stroke(Color(hex: 0x2A221C), lineWidth: 1))
             .help(
-                "A word or name teaches Phonon its spelling. \"misheard → right\" (or ->) "
+                "A word or name teaches \(AppBrand.name) its spelling. \"misheard → right\" (or ->) "
                     + "always turns the first into the second.")
 
             ScrollView {
@@ -885,7 +885,7 @@ struct MacrosView: View {
                         .textFieldStyle(.plain)
                         .lineLimit(1...5)
                 }
-                .help("What Phonon types instead. Line breaks are kept.")
+                .help("What \(AppBrand.name) types instead. Line breaks are kept.")
                 Button(action: save) {
                     Image(systemName: editingID == nil ? "plus" : "checkmark")
                 }
@@ -913,7 +913,7 @@ struct MacrosView: View {
                 }
                 .animation(Motion.quick, value: store.macros)
                 if store.macros.isEmpty {
-                    Text("Say a trigger as a whole dictation and Phonon types its text instead.")
+                    Text("Say a trigger as a whole dictation and \(AppBrand.name) types its text instead.")
                         .foregroundStyle(EmberTheme.mute)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.vertical, 12)
@@ -1043,7 +1043,7 @@ struct SettingsView: View {
                     SettingRow(
                         "After a paste, the clipboard holds",
                         help: "Your dictation: press ⌘V to paste it again anywhere. What you "
-                            + "copied before: Phonon puts it back once the paste has landed."
+                            + "copied before: \(AppBrand.name) puts it back once the paste has landed."
                     ) {
                         ChoiceChips(
                             options: ClipboardAfterPaste.allCases.map { ($0, $0.title) },
@@ -1071,7 +1071,7 @@ struct SettingsView: View {
                 SettingsGroup("System") {
                     SettingRow(
                         "Show in Dock",
-                        help: "Off keeps Phonon in the menu bar only. Open it again from the "
+                        help: "Off keeps \(AppBrand.name) in the menu bar only. Open it again from the "
                             + "ϕ menu."
                     ) { toggle(\.showInDock) }
                     SettingRow(
@@ -1080,8 +1080,8 @@ struct SettingsView: View {
                             + "carries nothing about you or your dictation."
                     ) { toggle(\.checkForUpdates) }
                     SettingRow(
-                        UpdateCheck.runningVersion.map { "Phonon \($0)" }
-                            ?? "Phonon (development build)",
+                        UpdateCheck.runningVersion.map { "\(AppBrand.name) \($0)" }
+                            ?? "\(AppBrand.name) (local build)",
                         help: "The installed version."
                     ) {
                         if let update = store.availableUpdate {
@@ -1185,7 +1185,7 @@ struct SettingsView: View {
             ) { toggle(\.textboxContext) }
             SettingRow(
                 "Learn from your edits",
-                help: "When you fix a word Phonon typed, offer to add it to the dictionary."
+                help: "When you fix a word \(AppBrand.name) typed, offer to add it to the dictionary."
             ) { toggle(\.editLearning) }
             SettingRow(
                 "Local history",
@@ -1227,7 +1227,7 @@ struct SettingsView: View {
                 "Recording cues", help: "Play a short sweep when a recording opens and closes."
             ) { toggle(\.soundFeedback) }
             SettingRow(
-                "Launch at login", help: "Start Phonon in the menu bar when you log in."
+                "Launch at login", help: "Start \(AppBrand.name) in the menu bar when you log in."
             ) {
                 Toggle("Launch at login", isOn: Binding(
                     get: { store.launchAtLoginEnabled },
@@ -1303,9 +1303,9 @@ struct SettingsView: View {
 
     private func exportEverything() {
         let panel = NSSavePanel()
-        panel.title = "Export Phonon data"
-        panel.message = "Phonon makes a folder with your dictations, notes, dictionary and macros."
-        panel.nameFieldStringValue = "Phonon Data"
+        panel.title = "Export \(AppBrand.name) data"
+        panel.message = "\(AppBrand.name) makes a folder with your dictations, notes, dictionary and macros."
+        panel.nameFieldStringValue = "\(AppBrand.name) Data"
         panel.canCreateDirectories = true
         guard panel.runModal() == .OK, let url = panel.url else { return }
         store.exportEverything(to: url)
@@ -1581,7 +1581,7 @@ struct PrivacyChoiceView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text("What Phonon may keep")
+            Text("What \(AppBrand.name) may keep")
                 .font(.title2.bold())
             Text(
                 "Dictation runs entirely on this Mac either way. These two features store or read more than the transcript, so they start off."
@@ -1618,7 +1618,7 @@ struct PrivacyChoiceView: View {
                 Text(
                     clipboard == .dictation
                         ? "Press ⌘V to paste your last dictation again anywhere."
-                        : "Phonon puts back what you had copied once the paste lands."
+                        : "\(AppBrand.name) puts back what you had copied once the paste lands."
                 )
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -1666,7 +1666,7 @@ struct PermissionGuideView: View {
                     .resizable()
                     .frame(width: 58, height: 58)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Phonon.app").font(.headline)
+                    Text("\(AppBrand.name).app").font(.headline)
                     Text("Installed in Applications and ready to add in System Settings.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -1677,7 +1677,7 @@ struct PermissionGuideView: View {
 
             Text(guide.manualInstructions)
                 .font(.headline)
-            Text("After enabling Phonon, quit it completely before reopening so macOS applies the permission.")
+            Text("After enabling \(AppBrand.name), quit it completely before reopening so macOS applies the permission.")
                 .font(.callout)
 
             HStack {
@@ -1690,7 +1690,7 @@ struct PermissionGuideView: View {
                     NSWorkspace.shared.open(guide.pane.settingsURL)
                 }
                 .buttonStyle(.borderedProminent)
-                Button("Quit Phonon", action: onDone)
+                Button("Quit \(AppBrand.name)", action: onDone)
             }
         }
         .padding(24)

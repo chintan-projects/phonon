@@ -1,13 +1,19 @@
-# Phonon
+# Murmur Lab
+
+A Phonon-derived Mac app for local dictation and quiet-speech experiments.
+The original [Phonon project](https://github.com/Infatoshi/phonon), GPL license,
+and upstream attribution are retained below.
 
 Open-source voice typing. Fast. Local. Yours.
 macOS is the shipped platform. Windows is in beta.
 
-[Website](https://phonon.sh) · [Releases](https://github.com/Infatoshi/phonon/releases)
+[Upstream website](https://phonon.sh) · [Upstream releases](https://github.com/Infatoshi/phonon/releases)
 
-## Our local Speech Lab experiment
+## Murmur Lab: our local Speech Lab experiment
 
-This branch adds **Speech Lab** to the sidebar for normal-versus-whispered
+Our version is named **Murmur Lab**. The capability branch is
+`codex/quiet-speech-lab`, based on upstream Phonon with the original GPL license
+and attribution retained. It adds **Speech Lab** to the sidebar for normal-versus-whispered
 microphone experiments. Press **Record**, read the reference, then **Stop & test**.
 The page compares Parakeet's raw transcript with LFM3's rewrite, measures word
 errors and batch latency, and offers fixed digital gain and JSON export. Audio
@@ -21,12 +27,12 @@ for evidence, open research, limitations, and the path to a future sensor input.
 Build the separate local app with `bash scripts/package-lab.sh`. It reuses the
 native Metal helpers from the verified release at `../verification/Phonon.app`
 (override `PHONON_LAB_ENGINE_APP` for a different path), builds the modified
-Swift/Rust source, and writes `bar/dist/PhononLab.app`. This local build is
+Swift/Rust source, and writes `bar/dist/Murmur Lab.app`. This local build is
 ad-hoc signed, has its own bundle identifier, and does not check for stock
 release updates. Quit the original Phonon before opening it. Microphone and
 other macOS permissions may need granting again for the new app identity.
 
-## Install
+## Install upstream Phonon
 
 Apple silicon, macOS 14 or later.
 

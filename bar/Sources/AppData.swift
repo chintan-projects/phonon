@@ -503,14 +503,14 @@ enum PermissionGuide: String, Identifiable {
     var detail: String {
         switch self {
         case .inputMonitoring:
-            return "Turn on Phonon so the hold-to-talk shortcut works everywhere."
+            return "Turn on \(AppBrand.name) so the hold-to-talk shortcut works everywhere."
         case .screenRecording:
-            return "Turn on Phonon so local screen context can improve technical terms."
+            return "Turn on \(AppBrand.name) so local screen context can improve technical terms."
         }
     }
 
     var manualInstructions: String {
-        "Click + in System Settings, type Phonon, press Return, then turn Phonon on."
+        "Click + in System Settings, type \(AppBrand.name), press Return, then turn \(AppBrand.name) on."
     }
 
     var pane: PrivacyPane {

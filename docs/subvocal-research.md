@@ -1,5 +1,8 @@
 # Subvocal and a local quiet-speech experiment
 
+Implemented in **Murmur Lab**, our Phonon-derived app, on branch
+`codex/quiet-speech-lab`. The page inside the app is named **Speech Lab**.
+
 Researched 5 November 2026. Target: **The Subvocal Company**, the YC-backed
 company at [subvocal.company](https://subvocal.company/).
 The first experiment uses a Mac and microphone only.
