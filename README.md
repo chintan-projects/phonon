@@ -11,6 +11,9 @@ macOS is the shipped platform. Windows is in beta.
 
 ## Murmur Lab: our local Speech Lab experiment
 
+See the [Murmur Lab guide](docs/murmur-lab.md) for recording and Notes workflows,
+storage and deletion rules, rebuilding, troubleshooting, and validation results.
+
 Our version is named **Murmur Lab**. The capability branch is
 `codex/quiet-speech-lab`, based on upstream Phonon with the original GPL license
 and attribution retained. It adds **Speech Lab** to the sidebar for normal-versus-whispered
@@ -189,10 +192,17 @@ after the models rather than the app, and no uninstaller touches them.
 
 ## Local data
 
-Nothing is retained until you say so. On first launch the app asks once whether
-to keep local history and whether to read the screen for context; both start off,
-and declining leaves dictation fully working. Settings carries the retention
-window (keep until deleted, or 7 / 30 / 90 days) and a clear-everything button.
+For regular dictation, local history and screen context start off. On first
+launch the app asks whether to enable them; declining leaves dictation fully
+working. Settings carries the dictation retention window (keep until deleted,
+or 7 / 30 / 90 days) and **Clear all history**.
+
+Murmur Lab's **Speech Lab** has a separate **Save recordings and transcripts in
+Notes** toggle, on by default. Its recordings stay under `SpeechLabNotes/`
+until moved to Trash in Notes. The regular dictation retention window and
+**Clear all history** do not remove these lab recordings. **Clear view** only
+clears the current experiment view. See the [storage guide](docs/murmur-lab.md#storage-and-deletion)
+for the saved files, temporary mode, and backup behavior.
 
 With local history on, every recording is kept with its metadata:
 
@@ -210,10 +220,13 @@ With local history on, every recording is kept with its metadata:
 (when you save it in History), dictionary changes, source, duration, and
 correction timings.
 
-Before speech recognition, an adaptive audio gate requires sustained
+For regular dictation, an adaptive audio gate requires sustained
 speech-like energy above the clip's measured noise floor. A clip without speech
 stays in the corpus with `speech_detected: false`, skips both models, and
 produces no text.
+
+Speech Lab rejects digital silence, but does not use that adaptive speech gate;
+other non-speech noise can still produce a transcript.
 
 Working with the dictionary and the stored recordings:
 

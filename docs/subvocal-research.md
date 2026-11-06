@@ -57,7 +57,7 @@ available to us today. [Preorder information](https://subvocal.company/preorder)
 | First decoder | Parakeet acoustic ASR | Proprietary sensor-to-text model | Existing Parakeet |
 | Text cleanup | Fine-tuned LFM3 | Public details insufficient | Existing LFM3, shown separately |
 | Runtime | Local Metal / MLX | Founder describes cloud launch inference | Local Metal / MLX |
-| Setup | Audio input and app permissions | Wearable and personal calibration | System-selected microphone |
+| Setup | Audio input and app permissions | Wearable and personal calibration | Shared dictation microphone selection |
 | Silent articulation | No useful acoustic input | Claimed target capability | Explicitly unsupported |
 
 The Phonon columns follow the [upstream architecture](../README.md#pipeline)
